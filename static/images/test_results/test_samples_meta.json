@@ -1,0 +1,463 @@
+{
+  "01_mouse_bite_11.jpg": {
+    "filename": "01_mouse_bite_11.jpg",
+    "path": "static/images/test_results/01_mouse_bite_11.jpg",
+    "defect_count": 0,
+    "primary_defect": "Clean Board",
+    "defects": []
+  },
+  "01_open_circuit_13.jpg": {
+    "filename": "01_open_circuit_13.jpg",
+    "path": "static/images/test_results/01_open_circuit_13.jpg",
+    "defect_count": 0,
+    "primary_defect": "Clean Board",
+    "defects": []
+  },
+  "01_spur_10.jpg": {
+    "filename": "01_spur_10.jpg",
+    "path": "static/images/test_results/01_spur_10.jpg",
+    "defect_count": 0,
+    "primary_defect": "Clean Board",
+    "defects": []
+  },
+  "01_spurious_copper_08.jpg": {
+    "filename": "01_spurious_copper_08.jpg",
+    "path": "static/images/test_results/01_spurious_copper_08.jpg",
+    "defect_count": 0,
+    "primary_defect": "Clean Board",
+    "defects": []
+  },
+  "04_mouse_bite_09.jpg": {
+    "filename": "04_mouse_bite_09.jpg",
+    "path": "static/images/test_results/04_mouse_bite_09.jpg",
+    "defect_count": 0,
+    "primary_defect": "Clean Board",
+    "defects": []
+  },
+  "04_spur_11.jpg": {
+    "filename": "04_spur_11.jpg",
+    "path": "static/images/test_results/04_spur_11.jpg",
+    "defect_count": 0,
+    "primary_defect": "Clean Board",
+    "defects": []
+  },
+  "04_spurious_copper_03.jpg": {
+    "filename": "04_spurious_copper_03.jpg",
+    "path": "static/images/test_results/04_spurious_copper_03.jpg",
+    "defect_count": 3,
+    "primary_defect": "Spurious Copper",
+    "defects": [
+      {
+        "class": "spurious_copper",
+        "display_name": "Spurious Copper",
+        "confidence": 0.782,
+        "bbox": [
+          438,
+          161,
+          447,
+          187
+        ],
+        "norm_bbox": [
+          0.691706,
+          0.273277,
+          0.0140673,
+          0.040512
+        ]
+      },
+      {
+        "class": "spurious_copper",
+        "display_name": "Spurious Copper",
+        "confidence": 0.7598,
+        "bbox": [
+          373,
+          291,
+          399,
+          302
+        ],
+        "norm_bbox": [
+          0.604129,
+          0.463861,
+          0.0406068,
+          0.0175983
+        ]
+      },
+      {
+        "class": "spurious_copper",
+        "display_name": "Spurious Copper",
+        "confidence": 0.7183,
+        "bbox": [
+          458,
+          216,
+          466,
+          243
+        ],
+        "norm_bbox": [
+          0.72244,
+          0.359959,
+          0.0128042,
+          0.0418956
+        ]
+      }
+    ]
+  },
+  "04_spurious_copper_11.jpg": {
+    "filename": "04_spurious_copper_11.jpg",
+    "path": "static/images/test_results/04_spurious_copper_11.jpg",
+    "defect_count": 0,
+    "primary_defect": "Clean Board",
+    "defects": []
+  },
+  "04_spurious_copper_17.jpg": {
+    "filename": "04_spurious_copper_17.jpg",
+    "path": "static/images/test_results/04_spurious_copper_17.jpg",
+    "defect_count": 2,
+    "primary_defect": "Spurious Copper",
+    "defects": [
+      {
+        "class": "spurious_copper",
+        "display_name": "Spurious Copper",
+        "confidence": 0.7728,
+        "bbox": [
+          492,
+          259,
+          515,
+          281
+        ],
+        "norm_bbox": [
+          0.787512,
+          0.422086,
+          0.0355764,
+          0.0342533
+        ]
+      },
+      {
+        "class": "spurious_copper",
+        "display_name": "Spurious Copper",
+        "confidence": 0.6511,
+        "bbox": [
+          243,
+          488,
+          251,
+          512
+        ],
+        "norm_bbox": [
+          0.386755,
+          0.78242,
+          0.0115788,
+          0.0376791
+        ]
+      }
+    ]
+  },
+  "06_open_circuit_10.jpg": {
+    "filename": "06_open_circuit_10.jpg",
+    "path": "static/images/test_results/06_open_circuit_10.jpg",
+    "defect_count": 0,
+    "primary_defect": "Clean Board",
+    "defects": []
+  },
+  "06_spurious_copper_03.jpg": {
+    "filename": "06_spurious_copper_03.jpg",
+    "path": "static/images/test_results/06_spurious_copper_03.jpg",
+    "defect_count": 0,
+    "primary_defect": "Clean Board",
+    "defects": []
+  },
+  "07_spurious_copper_09.jpg": {
+    "filename": "07_spurious_copper_09.jpg",
+    "path": "static/images/test_results/07_spurious_copper_09.jpg",
+    "defect_count": 5,
+    "primary_defect": "Spurious Copper",
+    "defects": [
+      {
+        "class": "spurious_copper",
+        "display_name": "Spurious Copper",
+        "confidence": 0.827,
+        "bbox": [
+          456,
+          284,
+          486,
+          303
+        ],
+        "norm_bbox": [
+          0.737197,
+          0.459324,
+          0.0464996,
+          0.0309287
+        ]
+      },
+      {
+        "class": "spurious_copper",
+        "display_name": "Spurious Copper",
+        "confidence": 0.8162,
+        "bbox": [
+          150,
+          249,
+          162,
+          292
+        ],
+        "norm_bbox": [
+          0.245156,
+          0.423676,
+          0.01869,
+          0.0674975
+        ]
+      },
+      {
+        "class": "spurious_copper",
+        "display_name": "Spurious Copper",
+        "confidence": 0.7269,
+        "bbox": [
+          335,
+          218,
+          364,
+          236
+        ],
+        "norm_bbox": [
+          0.547285,
+          0.356011,
+          0.0456655,
+          0.028146
+        ]
+      },
+      {
+        "class": "spurious_copper",
+        "display_name": "Spurious Copper",
+        "confidence": 0.7056,
+        "bbox": [
+          318,
+          293,
+          331,
+          329
+        ],
+        "norm_bbox": [
+          0.50802,
+          0.486941,
+          0.0202598,
+          0.0558332
+        ]
+      },
+      {
+        "class": "spurious_copper",
+        "display_name": "Spurious Copper",
+        "confidence": 0.6438,
+        "bbox": [
+          381,
+          263,
+          394,
+          300
+        ],
+        "norm_bbox": [
+          0.605793,
+          0.440703,
+          0.0209171,
+          0.0571173
+        ]
+      }
+    ]
+  },
+  "08_spur_06.jpg": {
+    "filename": "08_spur_06.jpg",
+    "path": "static/images/test_results/08_spur_06.jpg",
+    "defect_count": 0,
+    "primary_defect": "Clean Board",
+    "defects": []
+  },
+  "09_open_circuit_06.jpg": {
+    "filename": "09_open_circuit_06.jpg",
+    "path": "static/images/test_results/09_open_circuit_06.jpg",
+    "defect_count": 4,
+    "primary_defect": "Open Circuit",
+    "defects": [
+      {
+        "class": "open_circuit",
+        "display_name": "Open Circuit",
+        "confidence": 0.7424,
+        "bbox": [
+          245,
+          333,
+          254,
+          343
+        ],
+        "norm_bbox": [
+          0.390572,
+          0.528866,
+          0.0145769,
+          0.0156441
+        ]
+      },
+      {
+        "class": "open_circuit",
+        "display_name": "Open Circuit",
+        "confidence": 0.7287,
+        "bbox": [
+          535,
+          166,
+          546,
+          181
+        ],
+        "norm_bbox": [
+          0.84475,
+          0.272276,
+          0.0175804,
+          0.0241786
+        ]
+      },
+      {
+        "class": "open_circuit",
+        "display_name": "Open Circuit",
+        "confidence": 0.6715,
+        "bbox": [
+          323,
+          217,
+          332,
+          228
+        ],
+        "norm_bbox": [
+          0.511945,
+          0.348445,
+          0.0138063,
+          0.0176906
+        ]
+      },
+      {
+        "class": "open_circuit",
+        "display_name": "Open Circuit",
+        "confidence": 0.5887,
+        "bbox": [
+          276,
+          254,
+          288,
+          269
+        ],
+        "norm_bbox": [
+          0.441737,
+          0.409512,
+          0.0189828,
+          0.0226328
+        ]
+      }
+    ]
+  },
+  "11_missing_hole_03.jpg": {
+    "filename": "11_missing_hole_03.jpg",
+    "path": "static/images/test_results/11_missing_hole_03.jpg",
+    "defect_count": 0,
+    "primary_defect": "Clean Board",
+    "defects": []
+  },
+  "11_short_03.jpg": {
+    "filename": "11_short_03.jpg",
+    "path": "static/images/test_results/11_short_03.jpg",
+    "defect_count": 0,
+    "primary_defect": "Clean Board",
+    "defects": []
+  },
+  "11_spurious_copper_02.jpg": {
+    "filename": "11_spurious_copper_02.jpg",
+    "path": "static/images/test_results/11_spurious_copper_02.jpg",
+    "defect_count": 0,
+    "primary_defect": "Clean Board",
+    "defects": []
+  },
+  "12_open_circuit_02.jpg": {
+    "filename": "12_open_circuit_02.jpg",
+    "path": "static/images/test_results/12_open_circuit_02.jpg",
+    "defect_count": 0,
+    "primary_defect": "Clean Board",
+    "defects": []
+  },
+  "12_spurious_copper_04.jpg": {
+    "filename": "12_spurious_copper_04.jpg",
+    "path": "static/images/test_results/12_spurious_copper_04.jpg",
+    "defect_count": 5,
+    "primary_defect": "Spurious Copper",
+    "defects": [
+      {
+        "class": "spurious_copper",
+        "display_name": "Spurious Copper",
+        "confidence": 0.8087,
+        "bbox": [
+          148,
+          380,
+          170,
+          392
+        ],
+        "norm_bbox": [
+          0.249209,
+          0.6039,
+          0.0347944,
+          0.0182858
+        ]
+      },
+      {
+        "class": "spurious_copper",
+        "display_name": "Spurious Copper",
+        "confidence": 0.745,
+        "bbox": [
+          111,
+          271,
+          131,
+          281
+        ],
+        "norm_bbox": [
+          0.190355,
+          0.431881,
+          0.0309764,
+          0.0152157
+        ]
+      },
+      {
+        "class": "spurious_copper",
+        "display_name": "Spurious Copper",
+        "confidence": 0.7159,
+        "bbox": [
+          489,
+          190,
+          501,
+          214
+        ],
+        "norm_bbox": [
+          0.774626,
+          0.315959,
+          0.018324,
+          0.0373419
+        ]
+      },
+      {
+        "class": "spurious_copper",
+        "display_name": "Spurious Copper",
+        "confidence": 0.6982,
+        "bbox": [
+          249,
+          414,
+          278,
+          426
+        ],
+        "norm_bbox": [
+          0.412713,
+          0.657275,
+          0.0459219,
+          0.0190201
+        ]
+      },
+      {
+        "class": "spurious_copper",
+        "display_name": "Spurious Copper",
+        "confidence": 0.6629,
+        "bbox": [
+          354,
+          174,
+          364,
+          197
+        ],
+        "norm_bbox": [
+          0.561773,
+          0.290093,
+          0.0154742,
+          0.0363894
+        ]
+      }
+    ]
+  }
+}

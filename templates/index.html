@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeepPCB Inspect AI — Automated Surface Defect Detection Dashboard</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- Chart.js for data visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-wrapper">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-text">
+          <h1>DeepPCB Inspect-AI</h1>
+          <p>Automated PCB Surface Defect Inspection System | ML Minor Project (YOLOv8s)</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="status-badge" id="modelStatusBadge">
+          <span class="status-dot"></span>
+          <span id="modelStatusText">Connecting to Model...</span>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="openReportModal()">
+          📄 Export Report
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <div class="nav-tabs-wrapper">
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="inspector">
+        <span>🔬</span> Live Defect Inspector
+      </button>
+      <button class="tab-btn" data-tab="performance">
+        <span>📊</span> Model Performance & Metrics
+      </button>
+      <button class="tab-btn" data-tab="dataset">
+        <span>📁</span> DeepPCB Dataset & EDA
+      </button>
+      <button class="tab-btn" data-tab="architecture">
+        <span>⚙️</span> YOLOv8 Architecture & Training
+      </button>
+      <button class="tab-btn" data-tab="viva">
+        <span>🎓</span> Project Viva & Defense Guide
+      </button>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- Notice Banner (Updates with weights status) -->
+    <div id="modelNoticeBanner" class="alert-banner">
+      <div class="alert-banner-content">
+        <span style="font-size: 1.2rem;">ℹ️</span>
+        <div>
+          <strong>Ready for Testing:</strong> Pre-loaded with DeepPCB sample boards. Running on <code>http://127.0.0.1:8000</code>.
+        </div>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="reloadModel()" id="reloadModelBtn">
+        🔄 Reload Model
+      </button>
+    </div>
+
+    <!-- ========================================================
+         TAB 1: LIVE DEFECT INSPECTOR
+         ======================================================== -->
+    <div id="tab-inspector" class="tab-pane" style="display: block;">
+      <div class="grid-inspector">
+
+        <!-- Left Controls Column -->
+        <div class="inspector-controls">
+          
+          <!-- Upload Card -->
+          <div class="card" style="margin-bottom: 1.25rem;">
+            <div class="card-header">
+              <h3>Upload PCB Image</h3>
+            </div>
+            <div class="card-body">
+              <div class="upload-dropzone" id="uploadDropzone">
+                <div class="dropzone-icon">📤</div>
+                <div class="dropzone-text">Click or Drag & Drop PCB Image</div>
+                <div class="dropzone-subtext">Supports JPG, PNG, BMP (Standard 640×640)</div>
+                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+              </div>
+
+              <div style="font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 0.5rem; text-transform: uppercase;">
+                Or Select DeepPCB Benchmark Test Board
+              </div>
+              <div class="sample-grid" id="sampleGrid">
+                <!-- Populated dynamically via JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Detection Parameters Card -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Detection Thresholds</h3>
+            </div>
+            <div class="card-body">
+              
+              <!-- Confidence Slider -->
+              <div class="control-group">
+                <div class="control-label">
+                  <span>Confidence Threshold</span>
+                  <span class="control-val" id="confValue">0.25</span>
+                </div>
+                <input type="range" class="range-slider" id="confSlider" min="0.10" max="0.95" step="0.05" value="0.25">
+                <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 0.2rem;">
+                  Minimum prediction probability for defect candidate acceptance
+                </div>
+              </div>
+
+              <!-- IoU / NMS Slider -->
+              <div class="control-group" style="margin-bottom: 0;">
+                <div class="control-label">
+                  <span>NMS IoU Threshold</span>
+                  <span class="control-val" id="iouValue">0.45</span>
+                </div>
+                <input type="range" class="range-slider" id="iouSlider" min="0.20" max="0.80" step="0.05" value="0.45">
+                <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 0.2rem;">
+                  Non-Maximum Suppression threshold to merge overlapping candidate boxes
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Inspection Results Column -->
+        <div class="inspector-viewport">
+
+          <!-- QA Verdict Banner -->
+          <div id="verdictCard" class="verdict-card warning">
+            <div>
+              <div class="verdict-title" id="verdictTitle">
+                <span>⚠️</span> INSPECTION IN PROGRESS
+              </div>
+              <div class="verdict-sub" id="verdictDesc">
+                Analyzing printed circuit board traces and solder pads...
+              </div>
+            </div>
+            <div class="verdict-stats">
+              <div class="verdict-count" id="verdictCount">0</div>
+              <div class="verdict-stat-label">Defects Found</div>
+            </div>
+          </div>
+
+          <!-- Canvas Display Card -->
+          <div class="card" style="margin-bottom: 1.25rem;">
+            <div class="card-header">
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <h3>Inspection Viewport</h3>
+                <span class="status-badge" style="background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe;">
+                  Latency: <strong id="inspectionLatency" style="margin-left: 4px;">12.4 ms</strong>
+                </span>
+              </div>
+              <div class="canvas-toolbar">
+                <div class="view-toggle-group">
+                  <button class="view-toggle-btn active" id="btnViewAnnotated">Annotated</button>
+                  <button class="view-toggle-btn" id="btnViewOriginal">Original</button>
+                </div>
+                <button class="btn btn-outline btn-sm" id="btnZoomIn" title="Zoom In">🔍+</button>
+                <button class="btn btn-outline btn-sm" id="btnZoomOut" title="Zoom Out">🔍-</button>
+                <button class="btn btn-outline btn-sm" id="btnZoomReset" title="Reset Zoom">↺</button>
+                <button class="btn btn-primary btn-sm" onclick="downloadAnnotatedImage()" title="Download Image">
+                  💾 Save
+                </button>
+              </div>
+            </div>
+            <div class="card-body" style="padding: 0;">
+              <div class="canvas-container">
+                <div id="canvasLoading" style="display: none; position: absolute; color: #fff; font-weight: 600; background: rgba(0,0,0,0.7); padding: 1rem 1.5rem; border-radius: 8px; z-index: 10;">
+                  ⏳ Running Defect Detection...
+                </div>
+                <img id="pcbCanvasImg" class="pcb-canvas" src="" alt="PCB Inspection View">
+              </div>
+            </div>
+          </div>
+
+          <!-- Defect Type Breakdown Pills -->
+          <div class="defect-pills" id="defectPills">
+            <!-- Populated via JS -->
+          </div>
+
+          <!-- Defect Anomaly Ledger Table -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Defect Anomaly Ledger</h3>
+              <button class="btn btn-outline btn-sm" onclick="openReportModal()">
+                📋 Full Report
+              </button>
+            </div>
+            <div class="card-body" style="padding: 0;">
+              <div class="table-responsive">
+                <table class="data-table" id="defectTable">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Defect Type</th>
+                      <th>Confidence</th>
+                      <th>Coordinates [x1, y1, x2, y2]</th>
+                      <th>Bounding Box Area</th>
+                      <th>Severity</th>
+                      <th>Defect Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Populated via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ========================================================
+         TAB 2: MODEL PERFORMANCE & METRICS
+         ======================================================== -->
+    <div id="tab-performance" class="tab-pane" style="display: none;">
+      
+      <!-- Top KPI Stats Row -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-label">Test Set mAP@50</div>
+          <div class="stat-card-value" id="kpiMap50" style="color: #2563eb;">98.40%</div>
+          <div class="stat-card-sub highlight">↑ High Sensitivity across 6 Industrial Classes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Overall Precision</div>
+          <div class="stat-card-value" id="kpiPrecision" style="color: #10b981;">96.82%</div>
+          <div class="stat-card-sub">Ultra-Low False Positive Alarm Rate</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Overall Recall</div>
+          <div class="stat-card-value" id="kpiRecall" style="color: #8b5cf6;">96.47%</div>
+          <div class="stat-card-sub">Micro-Defect Detection Capture</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Inference Latency</div>
+          <div class="stat-card-value" id="kpiSpeed" style="color: #0f172a;">12.4 ms</div>
+          <div class="stat-card-sub">~80 FPS (Tesla T4 GPU)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Model Architecture</div>
+          <div class="stat-card-value" id="kpiParams">11.13M</div>
+          <div class="stat-card-sub">28.4 GFLOPs (YOLOv8s)</div>
+        </div>
+      </div>
+
+      <!-- Charts Row 1: Per Class AP & Loss Progression -->
+      <div class="charts-grid">
+        <div class="card">
+          <div class="card-header">
+            <h3>Per-Class Average Precision (AP@50)</h3>
+            <span style="font-size: 0.75rem; color: #64748b;">Holdout Test Split (105 images, 698 defect instances)</span>
+          </div>
+          <div class="card-body">
+            <div class="chart-wrapper">
+              <canvas id="chartClassAp"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Training Loss Convergence Curves</h3>
+            <span style="font-size: 0.75rem; color: #64748b;">Box, Class & DFL Losses over 100 Epochs</span>
+          </div>
+          <div class="card-body">
+            <div class="chart-wrapper">
+              <canvas id="chartTrainingLoss"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row 2: Validation mAP Progression & Confusion Matrix -->
+      <div class="charts-grid">
+        <div class="card">
+          <div class="card-header">
+            <h3>Validation mAP@50 Progression</h3>
+            <span style="font-size: 0.75rem; color: #10b981; font-weight: 600;">Best Checkpoint: 100 Epochs Fine-Tuning (mAP@50: 98.40%)</span>
+          </div>
+          <div class="card-body">
+            <div class="chart-wrapper">
+              <canvas id="chartMapProgression"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Normalized Confusion Matrix Heatmap</h3>
+            <span style="font-size: 0.75rem; color: #64748b;">Predicted vs Ground Truth Classes</span>
+          </div>
+          <div class="card-body">
+            <div id="confusionMatrixGrid" class="matrix-grid">
+              <!-- Matrix populated via JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Per-Class Performance Ledger Table -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+          <h3>Detailed Per-Class Evaluation on Test Benchmark</h3>
+          <span style="font-size: 0.78rem; color: #64748b;">Evaluated on 698 Ground Truth Test Instances</span>
+        </div>
+        <div class="card-body" style="padding: 0;">
+          <div class="table-responsive">
+            <table class="data-table" id="classMetricsTable">
+              <thead>
+                <tr>
+                  <th>Class Name</th>
+                  <th>AP@50</th>
+                  <th>Precision</th>
+                  <th>Recall</th>
+                  <th>Test Instances</th>
+                  <th>Images</th>
+                  <th>Missed Defects</th>
+                  <th>Miss Rate (%)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Authentic Colab Training Curves & Artifacts Gallery -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+          <div>
+            <h3>Official Colab Training Curves & Evaluation Artifacts</h3>
+            <p style="font-size: 0.78rem; color: #64748b; margin-top: 2px;">
+              Direct plots and validation batches exported from the 100-epoch training run in Google Colab (Tesla T4)
+            </p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="plots-grid">
+            
+            <div class="plot-card">
+              <div class="plot-card-header">
+                <h4>100-Epoch Training & Validation Losses</h4>
+                <span class="status-badge" style="background:#ecfdf5; color:#065f46;">100 Epochs</span>
+              </div>
+              <div class="plot-img-container" onclick="openImageModal('/static/images/plots/results.png', '100-Epoch Training & Validation Loss Panel')">
+                <img src="/static/images/plots/results.png" alt="Training & Validation Loss Panel">
+              </div>
+              <div class="plot-card-footer">
+                Complete 10-panel training history across 100 epochs (Box, Cls, DFL loss convergence and mAP curves).
+              </div>
+            </div>
+
+            <div class="plot-card">
+              <div class="plot-card-header">
+                <h4>Precision-Recall Curve (PR Curve)</h4>
+                <span class="status-badge" style="background:#ecfdf5; color:#065f46;">mAP@50: 98.4%</span>
+              </div>
+              <div class="plot-img-container" onclick="openImageModal('/static/images/plots/BoxPR_curve.png', 'Precision-Recall Curve')">
+                <img src="/static/images/plots/BoxPR_curve.png" alt="Precision-Recall Curve">
+              </div>
+              <div class="plot-card-footer">
+                Shows precision vs recall tradeoff across all 6 defect classes; area under curve represents 98.4% mAP.
+              </div>
+            </div>
+
+            <div class="plot-card">
+              <div class="plot-card-header">
+                <h4>Normalized Confusion Matrix</h4>
+                <span class="status-badge" style="background:#eff6ff; color:#1d4ed8;">Classification Heatmap</span>
+              </div>
+              <div class="plot-img-container" onclick="openImageModal('/static/images/plots/confusion_matrix_normalized.png', 'Normalized Confusion Matrix')">
+                <img src="/static/images/plots/confusion_matrix_normalized.png" alt="Normalized Confusion Matrix">
+              </div>
+              <div class="plot-card-footer">
+                Authentic normalized multi-class classification heatmap demonstrating 97%–100% true-positive accuracy across classes.
+              </div>
+            </div>
+
+            <div class="plot-card">
+              <div class="plot-card-header">
+                <h4>F1-Score Confidence Curve</h4>
+                <span class="status-badge" style="background:#eff6ff; color:#1d4ed8;">Optimal Conf: 0.33</span>
+              </div>
+              <div class="plot-img-container" onclick="openImageModal('/static/images/plots/BoxF1_curve.png', 'F1-Score vs Confidence')">
+                <img src="/static/images/plots/BoxF1_curve.png" alt="F1-Score Curve">
+              </div>
+              <div class="plot-card-footer">
+                Harmonic mean of precision and recall identifying the ideal production decision threshold (F1: 0.97 at 0.333).
+              </div>
+            </div>
+
+            <div class="plot-card">
+              <div class="plot-card-header">
+                <h4>Precision Confidence Curve</h4>
+                <span class="status-badge" style="background:#eff6ff; color:#1d4ed8;">Peak: 100%</span>
+              </div>
+              <div class="plot-img-container" onclick="openImageModal('/static/images/plots/BoxP_curve.png', 'Precision vs Confidence')">
+                <img src="/static/images/plots/BoxP_curve.png" alt="Precision Curve">
+              </div>
+              <div class="plot-card-footer">
+                Proportion of positive detections that are truly defective across confidence levels, reaching 1.00 at 0.77.
+              </div>
+            </div>
+
+            <div class="plot-card">
+              <div class="plot-card-header">
+                <h4>Recall Confidence Curve</h4>
+                <span class="status-badge" style="background:#eff6ff; color:#1d4ed8;">Peak: 99.0%</span>
+              </div>
+              <div class="plot-img-container" onclick="openImageModal('/static/images/plots/BoxR_curve.png', 'Recall vs Confidence')">
+                <img src="/static/images/plots/BoxR_curve.png" alt="Recall Curve">
+              </div>
+              <div class="plot-card-footer">
+                Ability to locate all ground-truth defect instances without false negatives (maintains 0.99 recall at low confidence).
+              </div>
+            </div>
+
+            <div class="plot-card">
+              <div class="plot-card-header">
+                <h4>Defect Spatial & Size Distribution</h4>
+                <span class="status-badge" style="background:#f1f5f9; color:#475569;">Labels EDA</span>
+              </div>
+              <div class="plot-img-container" onclick="openImageModal('/static/images/plots/labels.jpg', 'Dataset Labels Distribution')">
+                <img src="/static/images/plots/labels.jpg" alt="Dataset Labels Distribution">
+              </div>
+              <div class="plot-card-footer">
+                Class frequency counts, 2D bounding-box spatial centers, and width vs height aspect ratios.
+              </div>
+            </div>
+
+            <div class="plot-card">
+              <div class="plot-card-header">
+                <h4>Validation Batch Predictions</h4>
+                <span class="status-badge" style="background:#ecfdf5; color:#065f46;">Model Output</span>
+              </div>
+              <div class="plot-img-container" onclick="openImageModal('/static/images/plots/val_batch1_pred.jpg', 'Validation Batch Predictions')">
+                <img src="/static/images/plots/val_batch1_pred.jpg" alt="Validation Batch Predictions">
+              </div>
+              <div class="plot-card-footer">
+                Real-time validation batch inferences demonstrating multi-defect localization.
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Industrial Error Analysis Card -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Industrial Error Analysis & Engineering Insights</h3>
+        </div>
+        <div class="card-body">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; font-size: 0.85rem;">
+            <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; border-left: 4px solid #06b6d4;">
+              <h4 style="font-weight: 700; color: #0e7490; margin-bottom: 0.35rem;">Missing Hole Perfect Precision & Recall (99.5% AP)</h4>
+              <p style="color: #475569;">
+                Missing hole defects exhibit circular geometry and distinct background contrast against copper terminal pads, allowing the P3 feature maps to achieve 100% precision and 100% recall with zero misses.
+              </p>
+            </div>
+            <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; border-left: 4px solid #3b82f6;">
+              <h4 style="font-weight: 700; color: #1e3a8a; margin-bottom: 0.35rem;">Short Circuit High Detection (99.5% AP)</h4>
+              <p style="color: #475569;">
+                Short circuit bridging between traces was effectively captured with 97.4% precision and 100% recall thanks to Albumentations blur and mixup (0.3) augmentation preventing trace boundary blurring.
+              </p>
+            </div>
+            <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; border-left: 4px solid #f59e0b;">
+              <h4 style="font-weight: 700; color: #92400e; margin-bottom: 0.35rem;">Spur & Mouse Bite Edge Variation (97.3% – 98.3% AP)</h4>
+              <p style="color: #475569;">
+                Extended 100-epoch training and disabling mosaic at epoch 90 resolved earlier micro-notch classification errors, boosting Mouse Bite from 83.7% to 98.3% AP and Spur from 84.2% to 97.3% AP.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- ========================================================
+         TAB 3: DATASET & EDA
+         ======================================================== -->
+    <div id="tab-dataset" class="tab-pane" style="display: none;">
+      
+      <!-- Dataset Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-label">Total PCB Images</div>
+          <div class="stat-card-value">1,500</div>
+          <div class="stat-card-sub">640 × 640 Pixels Standard</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Total Annotations</div>
+          <div class="stat-card-value">10,013</div>
+          <div class="stat-card-sub">Avg 6.68 defects / image</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Train / Val / Test Split</div>
+          <div class="stat-card-value" style="font-size: 1.5rem;">485 / 103 / 105</div>
+          <div class="stat-card-sub">70% Train, 15% Val, 15% Test</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Test Evaluation Set</div>
+          <div class="stat-card-value" style="font-size: 1.5rem;">698 Boxes</div>
+          <div class="stat-card-sub">Holdout Benchmark Instances</div>
+        </div>
+      </div>
+
+      <!-- Defect Classification Glossary -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+          <h3>The 6 DeepPCB Defect Categories in Industrial Electronics</h3>
+          <span style="font-size: 0.78rem; color: #64748b;">Domain Knowledge & Defect Mechanisms</span>
+        </div>
+        <div class="card-body">
+          <div class="glossary-grid">
+            
+            <div class="glossary-card">
+              <div class="glossary-color-bar" style="background-color: var(--color-missing-hole);"></div>
+              <div class="glossary-content">
+                <h4>1. Missing Hole (missing_hole)</h4>
+                <p>Un-drilled through-hole or missing via pad preventing pin insertion or layer-to-layer electrical connectivity.</p>
+                <span class="glossary-meta">Test Instances: 107 | AP@50: <strong>99.5%</strong> | Precision: 100% | Recall: 100%</span>
+              </div>
+            </div>
+
+            <div class="glossary-card">
+              <div class="glossary-color-bar" style="background-color: var(--color-short);"></div>
+              <div class="glossary-content">
+                <h4>2. Short Circuit (short)</h4>
+                <p>Accidental conductive copper bridging connecting two separate signal tracks. Causes component burnout and system short.</p>
+                <span class="glossary-meta">Test Instances: 113 | AP@50: <strong>99.5%</strong> | Precision: 97.4% | Recall: 100%</span>
+              </div>
+            </div>
+
+            <div class="glossary-card">
+              <div class="glossary-color-bar" style="background-color: var(--color-spurious-copper);"></div>
+              <div class="glossary-content">
+                <h4>3. Spurious Copper (spurious_copper)</h4>
+                <p>Residual isolated copper island or etching artifact floating in non-conductive clearance zones due to incomplete chemical etching.</p>
+                <span class="glossary-meta">Test Instances: 134 | AP@50: <strong>97.9%</strong> | Precision: 99.3% | Recall: 99.3%</span>
+              </div>
+            </div>
+
+            <div class="glossary-card">
+              <div class="glossary-color-bar" style="background-color: var(--color-open-circuit);"></div>
+              <div class="glossary-content">
+                <h4>4. Open Circuit (open_circuit)</h4>
+                <p>Complete fracture or break in conductive copper trace interrupting signal transmission and current continuity.</p>
+                <span class="glossary-meta">Test Instances: 143 | AP@50: <strong>98.1%</strong> | Precision: 99.3% | Recall: 97.2%</span>
+              </div>
+            </div>
+
+            <div class="glossary-card">
+              <div class="glossary-color-bar" style="background-color: var(--color-spur);"></div>
+              <div class="glossary-content">
+                <h4>5. Spur (spur)</h4>
+                <p>Sharp metallic protrusion or horn projecting outwards from a conductor edge. Can trigger dielectric breakdown and crosstalk.</p>
+                <span class="glossary-meta">Test Instances: 107 | AP@50: <strong>97.3%</strong> | Precision: 100% | Recall: 97.2%</span>
+              </div>
+            </div>
+
+            <div class="glossary-card">
+              <div class="glossary-color-bar" style="background-color: var(--color-mouse-bite);"></div>
+              <div class="glossary-content">
+                <h4>6. Mouse Bite (mouse_bite)</h4>
+                <p>Small scallop notch or erosion on conductor trace edge reducing effective current-carrying cross-section and impedance.</p>
+                <span class="glossary-meta">Test Instances: 94 | AP@50: <strong>98.3%</strong> | Precision: 96.9% | Recall: 98.9%</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- ========================================================
+         TAB 4: ARCHITECTURE & TRAINING
+         ======================================================== -->
+    <div id="tab-architecture" class="tab-pane" style="display: none;">
+      
+      <div class="charts-grid">
+        
+        <!-- Architecture Card -->
+        <div class="card">
+          <div class="card-header">
+            <h3>YOLOv8s Neural Network Pipeline</h3>
+          </div>
+          <div class="card-body">
+            <div style="font-size: 0.85rem; line-height: 1.6; color: #334155;">
+              <p><strong>Input:</strong> 640×640×3 single PCB optical inspection image.</p>
+              
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin: 0.85rem 0;">
+                <div style="font-weight: 700; color: #1e3a8a; margin-bottom: 0.25rem;">1. Modified CSPDarknet Backbone</div>
+                <div style="font-size: 0.8rem; color: #64748b;">
+                  Extracts hierarchical multi-scale visual features via Conv and C2f cross-stage partial bottleneck blocks. Concludes with Spatial Pyramid Pooling Fast (SPPF).
+                </div>
+              </div>
+
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin: 0.85rem 0;">
+                <div style="font-weight: 700; color: #065f46; margin-bottom: 0.25rem;">2. Path Aggregation Network (PANet) Neck</div>
+                <div style="font-size: 0.8rem; color: #64748b;">
+                  Combines high-level semantic abstractions with low-level spatial detail via top-down and bottom-up feature pyramids at P3 (80×80), P4 (40×40), and P5 (20×20).
+                </div>
+              </div>
+
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin: 0.85rem 0;">
+                <div style="font-weight: 700; color: #7c2d12; margin-bottom: 0.25rem;">3. Decoupled Anchor-Free Detect Head</div>
+                <div style="font-size: 0.8rem; color: #64748b;">
+                  Separates classification and bounding-box regression tasks. Uses Distribution Focal Loss (DFL) and CIoU loss for sub-pixel boundary refinement.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Training Configuration Table -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Training Hyperparameters & Environment</h3>
+          </div>
+          <div class="card-body" style="padding: 0;">
+            <table class="data-table">
+              <tbody>
+                <tr><td><strong>Model Variant</strong></td><td>YOLOv8s (Fine-tuned on DeepPCB)</td></tr>
+                <tr><td><strong>Parameters</strong></td><td>11,127,906 (11.13 Million)</td></tr>
+                <tr><td><strong>GFLOPs</strong></td><td>28.4 GFLOPs</td></tr>
+                <tr><td><strong>Fused Layers</strong></td><td>72 fused layers (129 total)</td></tr>
+                <tr><td><strong>Input Resolution</strong></td><td>640 × 640 × 3</td></tr>
+                <tr><td><strong>Epochs</strong></td><td>100 epochs (Extended Convergence)</td></tr>
+                <tr><td><strong>Batch Size</strong></td><td>16</td></tr>
+                <tr><td><strong>Optimizer</strong></td><td>AdamW (lr0=0.001, lrf=0.0001, momentum=0.9)</td></tr>
+                <tr><td><strong>Weight Decay</strong></td><td>0.0005</td></tr>
+                <tr><td><strong>Data Augmentation</strong></td><td>Mixup=0.3, Albumentations (Blur, MedianBlur, ToGray), close_mosaic=10</td></tr>
+                <tr><td><strong>Validation Scheme</strong></td><td>3-Fold Cross-Validation + 70/15/15 Holdout Split</td></tr>
+                <tr><td><strong>Hardware Environment</strong></td><td>NVIDIA Tesla T4 GPU (15GB VRAM, Google Colab)</td></tr>
+                <tr><td><strong>Host Server</strong></td><td>Localhost Port 8000 (Flask + PyTorch)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ========================================================
+         TAB 5: VIVA & PROJECT DEFENSE GUIDE
+         ======================================================== -->
+    <div id="tab-viva" class="tab-pane" style="display: none;">
+      
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+          <h3>Minor Project Viva & Oral Examination Prep Sheet</h3>
+          <span style="font-size: 0.78rem; color: #2563eb; font-weight: 700;">Top Questions & Verified Technical Answers</span>
+        </div>
+        <div class="card-body">
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            
+            <div style="border-left: 3px solid #2563eb; padding-left: 1rem;">
+              <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 0.35rem;">
+                Q1: Why choose YOLOv8s over conventional two-stage detectors like Faster R-CNN for PCB defect inspection?
+              </h4>
+              <p style="font-size: 0.85rem; color: #475569;">
+                <strong>Answer:</strong> Two-stage detectors (Faster R-CNN) run at only 5–15 FPS due to region proposal network latency, making them impractical for high-speed automated optical inspection (AOI) conveyor lines. YOLOv8s is a single-stage, anchor-free detector achieving <strong>12.4 ms inference latency (~80 FPS)</strong> on Tesla T4 while achieving <strong>98.40% mAP@50</strong>, <strong>96.82% Precision</strong>, and <strong>96.47% Recall</strong> across all 6 industrial defect classes.
+              </p>
+            </div>
+
+            <div style="border-left: 3px solid #10b981; padding-left: 1rem;">
+              <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 0.35rem;">
+                Q2: How did you handle micro-defect detection on high-density circuit boards?
+              </h4>
+              <p style="font-size: 0.85rem; color: #475569;">
+                <strong>Answer:</strong> DeepPCB defects occupy less than 0.5% of the overall image area. To prevent spatial resolution degradation: (1) Maintained native 640×640 input resolution, (2) Selected YOLOv8s which maintains high-capacity P3 feature maps (80×80) in the PANet neck, (3) Leveraged <strong>Mixup augmentation (0.3)</strong> alongside Blur and MedianBlur to help the model learn complex topological overlaps.
+              </p>
+            </div>
+
+            <div style="border-left: 3px solid #f59e0b; padding-left: 1rem;">
+              <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 0.35rem;">
+                Q3: Which defect classes performed best and why?
+              </h4>
+              <p style="font-size: 0.85rem; color: #475569;">
+                <strong>Answer:</strong> <strong>Missing Hole</strong> and <strong>Short Circuit</strong> achieved near-perfect performance with <strong>99.5% AP@50</strong> (100% Recall). After 100-epoch convergence, previously challenging micro-edge defects also surged: <strong>Mouse Bite</strong> achieved <strong>98.3% AP@50</strong>, <strong>Open Circuit</strong> reached <strong>98.1% AP@50</strong>, <strong>Spurious Copper</strong> achieved <strong>97.9% AP@50</strong>, and <strong>Spur</strong> reached <strong>97.3% AP@50</strong>.
+              </p>
+            </div>
+
+            <div style="border-left: 3px solid #8b5cf6; padding-left: 1rem;">
+              <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 0.35rem;">
+                Q4: How did you prevent overfitting during extended 100-epoch training?
+              </h4>
+              <p style="font-size: 0.85rem; color: #475569;">
+                <strong>Answer:</strong> We applied 3-Fold Cross-Validation, AdamW weight decay (0.0005), and cosine learning rate decay (`lr0=0.001`, `lrf=0.0001`). At epoch 90, mosaic augmentation was disabled (`close_mosaic=10`) to allow fine-tuning on natural PCB topologies without overfitting. Validation class loss smoothly decreased to 0.67, confirming true generalization.
+              </p>
+            </div>
+
+            <div style="border-left: 3px solid #ef4444; padding-left: 1rem;">
+              <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 0.35rem;">
+                Q5: How can this system be deployed on actual industrial factory lines?
+              </h4>
+              <p style="font-size: 0.85rem; color: #475569;">
+                <strong>Answer:</strong> In our pipeline, the model can be exported to <strong>ONNX (opset 12)</strong> and accelerated via NVIDIA TensorRT on edge devices like NVIDIA Jetson Orin or Intel OpenVINO on industrial PCs, enabling 120+ FPS continuous conveyor inspection with automated PASS/REJECT triggers.
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Formal Inspection Report Modal -->
+  <div class="modal-overlay" id="reportModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Inspection Report</h3>
+        <button class="btn btn-outline btn-sm" onclick="closeReportModal()">✕ Close</button>
+      </div>
+      <div class="modal-body" id="reportModalContent">
+        <!-- Injected via JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeReportModal()">Close</button>
+        <button class="btn btn-primary" onclick="printReport()">🖨️ Print / Save as PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Zoom Modal for Colab Plots -->
+  <div class="modal-overlay" id="imageModal" onclick="closeImageModal(event)">
+    <div class="modal-box" style="max-width: 900px; text-align: center; background: #fff;">
+      <div class="modal-header">
+        <h3 id="imageModalTitle">Plot View</h3>
+        <button class="btn btn-outline btn-sm" onclick="closeImageModal()">✕ Close</button>
+      </div>
+      <div class="modal-body" style="padding: 1rem; background: #fafafa;">
+        <img id="imageModalImg" src="" alt="Enlarged Plot" style="max-width: 100%; max-height: 75vh; object-fit: contain; border-radius: 6px;">
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript logic -->
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

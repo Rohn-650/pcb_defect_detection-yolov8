@@ -1,0 +1,65 @@
+{
+  "11_missing_hole_03.jpg": {
+    "filename": "11_missing_hole_03.jpg",
+    "title": "Board #T11 \u2014 Missing Hole (AP: 99.5%)",
+    "path": "/static/images/samples/11_missing_hole_03.jpg",
+    "defect_type": "missing_hole",
+    "display_name": "Missing Hole",
+    "expected_defects": 7,
+    "status": "CRITICAL"
+  },
+  "11_short_03.jpg": {
+    "filename": "11_short_03.jpg",
+    "title": "Board #T24 \u2014 Short Circuit (AP: 98.0%)",
+    "path": "/static/images/samples/11_short_03.jpg",
+    "defect_type": "short",
+    "display_name": "Short Circuit",
+    "expected_defects": 2,
+    "status": "CRITICAL"
+  },
+  "04_spurious_copper_17.jpg": {
+    "filename": "04_spurious_copper_17.jpg",
+    "title": "Board #T36 \u2014 Spurious Copper (AP: 94.3%)",
+    "path": "/static/images/samples/04_spurious_copper_17.jpg",
+    "defect_type": "spurious_copper",
+    "display_name": "Spurious Copper",
+    "expected_defects": 2,
+    "status": "WARNING"
+  },
+  "12_open_circuit_02.jpg": {
+    "filename": "12_open_circuit_02.jpg",
+    "title": "Board #T42 \u2014 Open Circuit (AP: 89.0%)",
+    "path": "/static/images/samples/12_open_circuit_02.jpg",
+    "defect_type": "open_circuit",
+    "display_name": "Open Circuit",
+    "expected_defects": 1,
+    "status": "CRITICAL"
+  },
+  "07_spurious_copper_09.jpg": {
+    "filename": "07_spurious_copper_09.jpg",
+    "title": "Board #T58 \u2014 Spur & Bridge Flaw (AP: 84.2%)",
+    "path": "/static/images/samples/07_spurious_copper_09.jpg",
+    "defect_type": "spur",
+    "display_name": "Spur & Multi-Flaw",
+    "expected_defects": 3,
+    "status": "CRITICAL"
+  },
+  "04_mouse_bite_09.jpg": {
+    "filename": "04_mouse_bite_09.jpg",
+    "title": "Board #T65 \u2014 Mouse Bite (AP: 83.7%)",
+    "path": "/static/images/samples/04_mouse_bite_09.jpg",
+    "defect_type": "mouse_bite",
+    "display_name": "Mouse Bite",
+    "expected_defects": 1,
+    "status": "WARNING"
+  },
+  "sample_pcb_04.jpg": {
+    "filename": "sample_pcb_04.jpg",
+    "title": "Golden Reference Board (Clean PASS)",
+    "path": "/static/images/samples/sample_pcb_04.jpg",
+    "defect_type": "clean",
+    "display_name": "Golden Reference",
+    "expected_defects": 0,
+    "status": "PASS"
+  }
+}
