@@ -317,11 +317,6 @@ If you utilize this repository in your academic research or industrial project, 
 
 ---
 
-## 📄 License
-
-Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for detailed terms.
-
----
 
 <div align="center">
 Developed for Machine Learning Minor Degree Final Project • Built with PyTorch, Ultralytics YOLOv8, and Flask.
